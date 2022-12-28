@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
     #apps
     'apps.bot',
-    'apps.users',
 ]
 
 TOKEN = "5607757460:AAEFDnw9IuEUx5ksYcSs2NdkUaeu9yGD4AQ"
@@ -111,9 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bishkek'
 
 USE_I18N = True
 
@@ -129,3 +128,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'bot.User'
