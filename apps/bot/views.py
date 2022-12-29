@@ -41,6 +41,17 @@ def get_description(message):
     except:
         bot.send_message(chat_id=message.chat.id, text = "Произошла ошибка")
 
+@bot.message_handler(commands=['getpost'])
+def get_post(message):
+    user = User.objects.get(id_telegram=message.from_user.id)
+    for post in UserPost.objects.all().filter(user_id = user.id):
+        bot.send_message(chat_id=message.chat.id, text = f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}")
+        
+# @bot.message_handler(commands=['delete_post'])
+# def delete_post(message):
+#     user = User.objects.get(id_telegram=message.from_user.id)
+
+    
 @bot.message_handler()
 def not_found(message):
     bot.send_message(chat_id = message.chat.id, text = "Я вас не понял")

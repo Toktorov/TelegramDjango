@@ -37,8 +37,7 @@ class UserPost(models.Model):
         max_length=255,
         verbose_name="Название"
     )
-    description = models.CharField(
-        max_length=255,
+    description = models.TextField(
         verbose_name="Описание"
     )
     created = models.DateTimeField(
