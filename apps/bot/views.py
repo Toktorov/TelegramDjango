@@ -7,6 +7,7 @@ bot = TeleBot(settings.TOKEN, threaded=False)
 
 class Post:
     def __init__(self):
+        self.id = None
         self.title = None 
         self.description = None
 
@@ -45,13 +46,26 @@ def get_description(message):
 def get_post(message):
     user = User.objects.get(id_telegram=message.from_user.id)
     for post in UserPost.objects.all().filter(user_id = user.id):
-        bot.send_message(chat_id=message.chat.id, text = f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}")
+        bot.send_message(message.chat.id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}")
         
-# @bot.message_handler(commands=['delete_post'])
-# def delete_post(message):
-#     user = User.objects.get(id_telegram=message.from_user.id)
+@bot.message_handler(commands=['delete_post'])
+def delete_post(message):
+    msg = bot.send_message(message.chat.id, "Введите ID поста которую нужно удалить")
+    bot.register_next_step_handler(msg, get_delete_post)
 
-    
+def get_delete_post(message):
+    post_id = int(message.text)
+    try:
+        user = User.objects.get(id_telegram=message.from_user.id)
+        post = UserPost.objects.get(id = post_id)
+        if post.user.id == user.id:
+            post.delete()
+            bot.send_message(message.chat.id, f"Пост успешно удален")
+        else:
+            bot.send_message(message.chat.id, f"У вас нет прав на удаление поста")
+    except UserPost.DoesNotExist:
+        bot.send_message(message.chat.id, "ID поста которые вы ввели не найден")
+
 @bot.message_handler()
 def not_found(message):
-    bot.send_message(chat_id = message.chat.id, text = "Я вас не понял")
+    bot.send_message(message.chat.id, "Я вас не понял")
