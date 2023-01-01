@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django_resized.forms import ResizedImageField
 
 # Create your models here.
 class User(AbstractUser):
@@ -39,6 +40,13 @@ class UserPost(models.Model):
     )
     description = models.TextField(
         verbose_name="Описание"
+    )
+    image = ResizedImageField(
+        force_format="WEBP", 
+        quality=100, 
+        upload_to='post_images/',
+        verbose_name="Фотография проекта",
+        blank = True, null = True
     )
     created = models.DateTimeField(
         auto_now_add=True
