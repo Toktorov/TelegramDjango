@@ -4,8 +4,8 @@ from apps.bot.models import User, UserPost
 # Register your models here.
 class UserAdmin(admin.ModelAdmin):
     list_filter = ('username', )
-    list_display = ('username', 'id_telegram', 'first_name', 'last_name', 'chat_id')
-    search_fields = ('username', 'id_telegram', 'first_name', 'last_name', 'chat_id')
+    list_display = ('username', 'id_telegram', 'first_name', 'last_name', 'chat_id', 'date_joined')
+    search_fields = ('username', 'id_telegram', 'first_name', 'last_name', 'chat_id', 'date_joined')
     list_per_page = 20
 
 class UserPostAdmin(admin.ModelAdmin):

@@ -1,23 +1,22 @@
 from django.shortcuts import render
 from django.conf import settings
-from telebot import TeleBot
+from telebot import TeleBot, types
 from apps.bot.models import User, UserPost
 
 bot = TeleBot(settings.TOKEN, threaded=False)
 
 @bot.message_handler(commands=['start'])
-def start(message):
-    try:
-        user = User.objects.get(id_telegram=message.from_user.id)
-    except:
-        User.objects.create(username = message.from_user.username, id_telegram=message.from_user.id, first_name = message.from_user.first_name, last_name = message.from_user.last_name, chat_id = message.chat.id)
+def start(message:types.Message):
+    # try:
+    #     user = User.objects.get(id_telegram=message.from_user.id)
+    # except:
+    User.objects.get_or_create(username = message.from_user.username, id_telegram=message.from_user.id, first_name = message.from_user.first_name, last_name = message.from_user.last_name, chat_id = message.chat.id)
     bot.send_message(message.chat.id, f"Привет {message.from_user.full_name}")
 
 class Post():
     def __init__(self):
         self.title = None 
         self.description = None
-        self.image = None
 
 post = Post()
 
@@ -53,7 +52,9 @@ def get_image(message):
 def get_post(message):
     user = User.objects.get(id_telegram=message.from_user.id)
     for post in UserPost.objects.all().filter(user_id = user.id):
-        bot.send_message(message.chat.id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nФотография: {post.image}\nСоздан {post.created}")
+        bot.send_message(message.chat.id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nСоздан {post.created}")
+        with open(f'media/{post.image}', 'rb') as image:
+            bot.send_photo(message.chat.id, image)
         
 @bot.message_handler(commands=['delete_post'])
 def delete_post(message):
