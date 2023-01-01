@@ -5,5 +5,5 @@ class Command(BaseCommand):
     help = 'Bot' 
 
     def handle(self, *args, **kwargs):
-        print("START BOT")
+        print("START TELEGRAM BOT")
         bot.polling(none_stop=True, interval=0)
