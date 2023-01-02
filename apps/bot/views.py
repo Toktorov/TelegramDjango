@@ -49,21 +49,28 @@ def get_image(message):
 def get_post(message:types.Message, page = 1):
     user = User.objects.get(id_telegram=message.from_user.id)
     users_post = UserPost.objects.all().filter(user_id = user.id)
+    len_users_post = UserPost.objects.all().filter(user_id = user.id)
     paginator = InlineKeyboardPaginator(
-        len(users_post),
+        len(len_users_post),
         current_page=page,
         data_pattern='character#{page}',
     )
+    n = 0
     for post in users_post:
-        bot.send_message(user.chat_id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nСоздан {post.created}")
-        try:
-            with open(f'media/{post.image}', 'rb') as image:
-                bot.send_photo(user.chat_id, image)
-        except:
-            bot.send_message(user.chat_id, f"У поста ID: {post.id} нету фотографии")
+        if n != page:
+            bot.send_message(user.chat_id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nСоздан {post.created}")
+            try:
+                with open(f'media/{post.image}', 'rb') as image:
+                    bot.send_photo(user.chat_id, image)
+            except:
+                bot.send_message(user.chat_id, f"У поста ID: {post.id} нету фотографии")
+        else:
+            n = 0
+            break
+        n += 1
     bot.send_message(
         user.chat_id,
-        users_post[page-1],
+        f"{page} / {len(len_users_post)}",
         reply_markup=paginator.markup,
         parse_mode='Markdown'
     )
