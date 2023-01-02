@@ -1,4 +1,5 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram_bot_pagination import InlineKeyboardPaginator
 
 def start_command():
     keyboard = InlineKeyboardMarkup().add(

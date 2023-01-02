@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.conf import settings
-from telebot import TeleBot, types, logger
+from telebot import TeleBot, types
 from apps.bot.models import User, UserPost
 from apps.bot.keyboard import start_command
+from telegram_bot_pagination import InlineKeyboardPaginator
 
 bot = TeleBot(settings.TOKEN, threaded=False)
 
@@ -45,15 +46,27 @@ def get_image(message):
         bot.send_message(message.chat.id, f"Произошла ошибка {error}")
 
 @bot.message_handler(commands=['getpost']) 
-def get_post(message:types.Message):
+def get_post(message:types.Message, page = 1):
     user = User.objects.get(id_telegram=message.from_user.id)
-    for post in UserPost.objects.all().filter(user_id = user.id):
+    users_post = UserPost.objects.all().filter(user_id = user.id)
+    paginator = InlineKeyboardPaginator(
+        len(users_post),
+        current_page=page,
+        data_pattern='character#{page}',
+    )
+    for post in users_post:
         bot.send_message(user.chat_id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nСоздан {post.created}")
         try:
             with open(f'media/{post.image}', 'rb') as image:
                 bot.send_photo(user.chat_id, image)
         except:
             bot.send_message(user.chat_id, f"У поста ID: {post.id} нету фотографии")
+    bot.send_message(
+        user.chat_id,
+        users_post[page-1],
+        reply_markup=paginator.markup,
+        parse_mode='Markdown'
+    )
         
 @bot.message_handler(commands=['delete_post'])
 def delete_post(message:types.Message):
@@ -76,6 +89,15 @@ def get_delete_post(message:types.Message):
         bot.send_message(user.chat_id, "ID поста которые вы ввели не найден")
     except ValueError:
         bot.send_message(user.chat_id, "Введите ID как целое число")
+
+@bot.callback_query_handler(func=lambda call: call.data.split('#')[0]=='character')
+def characters_page_callback(call):
+    page = int(call.data.split('#')[1])
+    bot.delete_message(
+        call.message.chat.id,
+        call.message.message_id
+    )
+    get_post(call, page)
 
 @bot.callback_query_handler(func = lambda call: True)
 def all_command(call):
