@@ -10,11 +10,13 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         max_length=255,
-        verbose_name="Фамилия"
+        verbose_name="Фамилия",
+        blank=True, null = True
     )
     last_name = models.CharField(
         max_length=255,
-        verbose_name="Имя"
+        verbose_name="Имя",
+        blank=True, null = True
     )
     chat_id = models.PositiveBigIntegerField(
         verbose_name="CHAT ID",

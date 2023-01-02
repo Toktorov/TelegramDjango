@@ -9,6 +9,7 @@ bot = TeleBot(settings.TOKEN, threaded=False)
 @bot.message_handler(commands=['start'])
 def start(message:types.Message):
     User.objects.get_or_create(username = message.from_user.username, id_telegram=message.from_user.id, first_name = message.from_user.first_name, last_name = message.from_user.last_name, chat_id = message.chat.id)
+    bot.delete_message(message.chat.id, message.message_id)
     bot.send_message(message.chat.id, f"Привет {message.from_user.full_name}", reply_markup=start_command())
 
 class Post():
@@ -18,12 +19,12 @@ class Post():
 
 post = Post()
 
-def get_title(message):
+def get_title(message:types.Message):
     post.title = message.text
     msg = bot.send_message(message.chat.id, "Отправьте описание")
     bot.register_next_step_handler(msg, get_description)
 
-def get_description(message):
+def get_description(message:types.Message):
     post.description = message.text
     msg = bot.send_message(message.chat.id, "Отправьте фотографию поста")
     bot.register_next_step_handler(msg, get_image)
@@ -44,7 +45,7 @@ def get_image(message):
         bot.send_message(message.chat.id, f"Произошла ошибка {error}")
 
 @bot.message_handler(commands=['getpost']) 
-def get_post(message):
+def get_post(message:types.Message):
     user = User.objects.get(id_telegram=message.from_user.id)
     for post in UserPost.objects.all().filter(user_id = user.id):
         bot.send_message(user.chat_id, f"ID поста: {post.id}\nНазвание: {post.title}\nОписание: {post.description}\nСоздан {post.created}")
@@ -55,12 +56,13 @@ def get_post(message):
             bot.send_message(user.chat_id, f"У поста ID: {post.id} нету фотографии")
         
 @bot.message_handler(commands=['delete_post'])
-def delete_post(message):
+def delete_post(message:types.Message):
     user = User.objects.get(id_telegram=message.from_user.id)
     msg = bot.send_message(user.chat_id, "Введите ID поста которую нужно удалить")
     bot.register_next_step_handler(msg, get_delete_post)
 
-def get_delete_post(message):
+def get_delete_post(message:types.Message):
+    bot.delete_message(message.chat.id, message.message_id)
     try:
         post_id = int(message.text)
         user = User.objects.get(id_telegram=message.from_user.id)
@@ -85,6 +87,6 @@ def all_command(call):
     elif call.data == "delete_post":
         delete_post(call)
 
-@bot.message_handler()
-def not_found(message):
+@bot.message_handler()  
+def not_found(message:types.Message):
     bot.send_message(message.chat.id, "Я вас не понял")
