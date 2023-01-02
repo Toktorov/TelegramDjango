@@ -1,0 +1,28 @@
+version: "3.8"
+   
+services:
+
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: bash -c "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:7000"  
+    volumes:
+      - .:/code
+    ports:
+      - "7000:7000"
+    container_name: telebot
+
+  telegram_bot:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: "python3 manage.py bot"
+    volumes:
+      - .:/code 
+    container_name: telebot_management
+
+volumes:
+  postgres_data:
+  media_volume:
+  static_volume:
